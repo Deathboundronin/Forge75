@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#060809">
+    <meta name="description" content="A private, cloud-synced 75 Hard tracker.">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Forge 75">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="stylesheet" href="./styles.css">
+    <title>Forge 75</title>
+  </head>
+  <body>
+    <main class="site-shell">
+      <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+        <div class="auth-orbit" aria-hidden="true"></div>
+        <div class="auth-card">
+          <div class="brand"><span class="brand-mark">F</span><span>Forge 75</span></div>
+          <p class="eyebrow">Private progress system</p>
+          <h1 id="auth-title">Your challenge, on every device.</h1>
+          <p class="auth-copy" id="auth-copy">Sign in once and your progress follows you between phone and laptop.</p>
+          <form id="email-form" class="email-form">
+            <label for="email">Your email</label>
+            <div class="email-row">
+              <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
+              <button type="submit">Send magic link</button>
+            </div>
+          </form>
+          <button class="text-button" type="button" id="preview-button">Continue without an account</button>
+          <p class="auth-note" id="auth-note">No password. We email you a private sign-in link.</p>
+          <p class="config-note" id="config-note" hidden></p>
+        </div>
+      </section>
+
+      <section class="app-shell" id="app-shell" hidden aria-label="Forge 75 tracker">
+        <header class="topbar">
+          <a class="brand" href="#" aria-label="Forge 75 home"><span class="brand-mark">F</span><span>Forge 75</span></a>
+          <div class="topbar-actions">
+            <span class="sync-status" id="sync-status" role="status"><i></i><span>Syncing</span></span>
+            <button type="button" class="quiet-button" id="export-button">Backup</button>
+            <button type="button" class="quiet-button" id="import-button">Restore</button>
+            <input type="file" id="import-file" accept="application/json,.json" hidden>
+            <button type="button" class="quiet-button" id="install-button" hidden>Install app</button>
+            <button type="button" class="user-button" id="signout-button" hidden>Sign out</button>
+          </div>
+        </header>
+
+        <section class="hero">
+          <div>
+            <p class="eyebrow">75 Hard command center</p>
+            <h1>Build the day.<br><em>Own the streak.</em></h1>
+            <p class="hero-description" id="today-description">Loading your challenge…</p>
+          </div>
+          <div class="hero-actions">
+            <label class="start-control" for="start-date"><span>Challenge start</span><input id="start-date" type="date"></label>
+            <button type="button" class="focus-button" id="focus-today">Focus today</button>
+          </div>
+        </section>
+
+        <section class="score-grid" aria-label="Progress summary">
+          <article class="score-card score-primary">
+            <div class="ring" id="daily-ring" role="img" aria-label="Daily core score">
+              <div class="ring-core"><strong id="daily-score">0</strong><span>%</span></div>
+            </div>
+            <div>
+              <p>Daily core score</p>
+              <strong class="score-detail" id="daily-detail">0 of 6 complete</strong>
+            </div>
+          </article>
+          <article class="metric-card">
+            <p>Mission score</p>
+            <strong id="mission-score">0%</strong>
+            <span>Official rules only</span>
+          </article>
+          <article class="metric-card">
+            <p>Current streak</p>
+            <strong id="streak-score">0</strong>
+            <span>Full official days</span>
+          </article>
+          <article class="metric-card">
+            <p>Plus score</p>
+            <strong id="plus-score">0%</strong>
+            <span>Extra habits today</span>
+          </article>
+        </section>
+
+        <section class="protocol-layout">
+          <div class="protocol-panel">
+            <div class="section-heading">
+              <div><p class="eyebrow">Daily protocol</p><h2 id="selected-title">Day 1</h2></div>
+              <span class="date-stamp" id="selected-date">—</span>
+            </div>
+            <div class="rule-disclaimer"><span>Official score</span><span>All six items are required to complete a 75 Hard day.</span></div>
+            <div class="task-grid" id="official-tasks" aria-label="Official 75 Hard daily tasks"></div>
+          </div>
+
+          <aside class="plus-panel">
+            <div class="section-heading compact"><div><p class="eyebrow">Your extras</p><h2>Forge Plus</h2></div></div>
+            <p class="plus-copy">Optional habits make the plan yours. They never change your official 75 Hard score.</p>
+            <div class="plus-list" id="plus-tasks" aria-label="Optional daily habits"></div>
+          </aside>
+        </section>
+
+        <section class="notes-section">
+          <label for="daily-note">Daily note <span>Optional</span></label>
+          <textarea id="daily-note" maxlength="500" placeholder="What made today easier, harder, or worth remembering?"></textarea>
+        </section>
+
+        <section class="mission-map" aria-labelledby="mission-map-title">
+          <div class="map-heading">
+            <div><p class="eyebrow">Progress map</p><h2 id="mission-map-title">75-day mission</h2></div>
+            <div class="map-legend" aria-label="Map legend"><span><i class="legend-complete"></i>Complete</span><span><i class="legend-today"></i>Today</span><span><i class="legend-future"></i>Upcoming</span></div>
+          </div>
+          <div class="day-grid" id="day-grid" aria-label="Select a challenge day"></div>
+        </section>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./config.js"></script>
+    <script src="./vendor/supabase.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=false;document.head.appendChild(s)"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

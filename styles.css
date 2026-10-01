@@ -416,3 +416,7 @@ h1, h2, p { margin-top: 0; }
   .task-card { padding: 10px; }
   .date-stamp { font-size: 11px; }
 }
+
+/* Fixes: hidden sections must really hide, and the decorative ring must never block taps */
+[hidden] { display: none !important; }
+.auth-orbit { display: none !important; }

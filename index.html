@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#060809">
     <meta name="description" content="A private, cloud-synced 75 Hard tracker.">
-    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Forge 75">
@@ -110,6 +110,30 @@
           <textarea id="daily-note" maxlength="500" placeholder="What made today easier, harder, or worth remembering?"></textarea>
         </section>
 
+        <section class="body-section" aria-labelledby="body-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">Body tracking</p><h2 id="body-title">Weight &amp; photo</h2></div>
+            <span class="date-stamp" id="weight-summary"></span>
+          </div>
+          <div class="body-grid">
+            <div>
+              <label class="body-label" for="weight-input">Weight for this day (kg)</label>
+              <input id="weight-input" class="weight-input" type="number" inputmode="decimal" step="0.1" min="20" max="400" placeholder="e.g. 78.4">
+              <div class="weight-chart" id="weight-chart"></div>
+            </div>
+            <div>
+              <span class="body-label">Progress photo</span>
+              <div class="photo-frame" id="photo-frame"><span>No photo for this day</span></div>
+              <div class="photo-actions">
+                <label class="focus-button photo-button" for="photo-input">Add photo</label>
+                <input id="photo-input" type="file" accept="image/*" hidden>
+                <button type="button" class="quiet-button" id="photo-delete" hidden>Remove</button>
+              </div>
+              <p class="photo-note">Photos stay on this device only and are not included in Backup.</p>
+            </div>
+          </div>
+        </section>
+
         <section class="mission-map" aria-labelledby="mission-map-title">
           <div class="map-heading">
             <div><p class="eyebrow">Progress map</p><h2 id="mission-map-title">75-day mission</h2></div>
@@ -121,7 +145,7 @@
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="./config.js"></script>
-    <script src="./vendor/supabase.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=false;document.head.appendChild(s)"></script>
+    <script src="./supabase.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';s.async=false;document.head.appendChild(s)"></script>
     <script src="./app.js"></script>
   </body>
 </html>

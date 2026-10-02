@@ -420,3 +420,18 @@ h1, h2, p { margin-top: 0; }
 /* Fixes: hidden sections must really hide, and the decorative ring must never block taps */
 [hidden] { display: none !important; }
 .auth-orbit { display: none !important; }
+
+.body-section { margin-top: 14px; padding: 22px; background: linear-gradient(145deg, rgba(18,24,25,.93), rgba(9,12,13,.93)); border: 1px solid var(--line); border-radius: 16px; }
+.body-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(220px, 1fr); gap: 22px; margin-top: 18px; }
+.body-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.weight-input { width: 100%; max-width: 220px; min-height: 42px; padding: 0 12px; color: var(--text); background: rgba(255,255,255,.035); border: 1px solid var(--line); border-radius: 9px; }
+.weight-input:disabled { opacity: .45; }
+.weight-chart { margin-top: 14px; }
+.weight-chart svg { display: block; width: 100%; height: auto; }
+.chart-empty { margin: 24px 0; color: var(--muted); font-size: 13px; }
+.photo-frame { display: grid; min-height: 190px; max-height: 320px; place-items: center; overflow: hidden; color: var(--muted); background: rgba(255,255,255,.03); border: 1px dashed var(--line); border-radius: 12px; font-size: 12px; }
+.photo-frame img { display: block; width: 100%; max-height: 320px; object-fit: cover; }
+.photo-actions { display: flex; gap: 9px; margin-top: 10px; }
+.photo-button { display: inline-flex; align-items: center; cursor: pointer; }
+.photo-note { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+@media (max-width: 660px) { .body-section { padding: 16px; border-radius: 13px; } .body-grid { grid-template-columns: 1fr; } }

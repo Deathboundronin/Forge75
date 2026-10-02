@@ -313,6 +313,7 @@
     renderScores();
     renderTasks();
     renderTimeline();
+    renderBody();
   }
   function openApp() {
     els.auth.hidden = true;
@@ -397,6 +398,108 @@
       els.install.hidden = true;
     });
   }
+  var photoUrl = null;
+  function photoOp(mode, fn) {
+    return new Promise(function (resolve, reject) {
+      var open = indexedDB.open("forge75-photos", 1);
+      open.onupgradeneeded = function () { open.result.createObjectStore("p"); };
+      open.onerror = function () { reject(open.error); };
+      open.onsuccess = function () {
+        var tx = open.result.transaction("p", mode), request = fn(tx.objectStore("p"));
+        tx.oncomplete = function () { resolve(request && request.result); };
+        tx.onerror = function () { reject(tx.error); };
+      };
+    });
+  }
+  function showPhoto(key) {
+    var frame = document.getElementById("photo-frame"), del = document.getElementById("photo-delete");
+    if (photoUrl) { URL.revokeObjectURL(photoUrl); photoUrl = null; }
+    frame.innerHTML = "<span>No photo for this day</span>";
+    del.hidden = true;
+    photoOp("readonly", function (store) { return store.get(key); }).then(function (blob) {
+      if (!blob || key !== selectedKey()) return;
+      photoUrl = URL.createObjectURL(blob);
+      var img = new Image();
+      img.src = photoUrl;
+      img.alt = "Progress photo";
+      frame.innerHTML = "";
+      frame.appendChild(img);
+      del.hidden = false;
+    }).catch(function () {});
+  }
+  function addPhoto(event) {
+    var file = event.target.files && event.target.files[0], key = selectedKey();
+    event.target.value = "";
+    if (!file) return;
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+      var scale = Math.min(1, 1000 / Math.max(img.width, img.height)), canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        photoOp("readwrite", function (store) { return store.put(blob, key); })
+          .then(function () { showPhoto(key); showToast("Photo saved on this device."); })
+          .catch(function () { showToast("Could not save the photo."); });
+      }, "image/jpeg", 0.82);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); showToast("That image could not be read."); };
+    img.src = url;
+  }
+  function removePhoto() {
+    var key = selectedKey();
+    if (!window.confirm("Remove this photo?")) return;
+    photoOp("readwrite", function (store) { return store.delete(key); }).then(function () { showPhoto(key); }).catch(function () {});
+  }
+  function drawChart() {
+    var box = document.getElementById("weight-chart"), summary = document.getElementById("weight-summary");
+    var keys = Object.keys(state.records).filter(function (k) { return state.records[k] && Number(state.records[k].weight) > 0; }).sort();
+    if (!keys.length) { box.innerHTML = '<p class="chart-empty">Log your weight to see your graph.</p>'; summary.textContent = ""; return; }
+    var vals = keys.map(function (k) { return Number(state.records[k].weight); });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (hi - lo < 1) { lo -= 0.5; hi += 0.5; }
+    var pad = (hi - lo) * 0.15; lo -= pad; hi += pad;
+    var W = 600, H = 220, L = 42, R = 16, T = 14, B = 28;
+    var t0 = parseDate(keys[0]).getTime(), t1 = parseDate(keys[keys.length - 1]).getTime();
+    function X(k) { return keys.length === 1 || t1 === t0 ? (L + W - R) / 2 : L + (parseDate(k).getTime() - t0) / (t1 - t0) * (W - L - R); }
+    function Y(v) { return T + (hi - v) / (hi - lo) * (H - T - B); }
+    var grid = [lo, (lo + hi) / 2, hi].map(function (v) {
+      return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="rgba(229,246,237,.1)"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" fill="#8b9790" font-size="11">' + v.toFixed(1) + '</text>';
+    }).join("");
+    var points = keys.map(function (k, i) { return X(k).toFixed(1) + "," + Y(vals[i]).toFixed(1); });
+    var dots = keys.map(function (k, i) { return '<circle cx="' + X(k).toFixed(1) + '" cy="' + Y(vals[i]).toFixed(1) + '" r="' + (i === keys.length - 1 ? 5 : 3.5) + '" fill="' + (i === keys.length - 1 ? "#b8ff4b" : "#5ee1d2") + '"/>'; }).join("");
+    box.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Weight over time">' + grid +
+      '<polyline points="' + points.join(" ") + '" fill="none" stroke="#5ee1d2" stroke-width="2.5" stroke-linejoin="round"/>' + dots +
+      '<text x="' + L + '" y="' + (H - 6) + '" fill="#8b9790" font-size="11">' + prettyDate(keys[0]) + '</text>' +
+      (keys.length > 1 ? '<text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end" fill="#8b9790" font-size="11">' + prettyDate(keys[keys.length - 1]) + '</text>' : "") + "</svg>";
+    var change = vals[vals.length - 1] - vals[0];
+    summary.textContent = vals[vals.length - 1].toFixed(1) + " kg" + (keys.length > 1 ? " (" + (change > 0 ? "+" : "") + change.toFixed(1) + " since start)" : "");
+  }
+  function renderBody() {
+    var key = selectedKey(), future = isFuture(state.selectedDay), input = document.getElementById("weight-input");
+    var record = getRecord(key);
+    input.value = record.weight || "";
+    input.disabled = future;
+    document.getElementById("photo-input").disabled = future;
+    drawChart();
+    showPhoto(key);
+  }
+  function handleWeight(event) {
+    if (isFuture(state.selectedDay)) return;
+    var record = getRecord(selectedKey()), text = event.target.value.trim(), value = parseFloat(text);
+    if (!text) delete record.weight;
+    else if (value >= 20 && value <= 400) record.weight = Math.round(value * 10) / 10;
+    else { showToast("Enter a weight between 20 and 400 kg."); return; }
+    state.updatedAt = new Date().toISOString();
+    saveChange();
+    drawChart();
+  }
+  function bindBody() {
+    document.getElementById("weight-input").addEventListener("change", handleWeight);
+    document.getElementById("photo-input").addEventListener("change", addPhoto);
+    document.getElementById("photo-delete").addEventListener("click", removePhoto);
+  }
   function exportData() {
     var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     var link = document.createElement("a");
@@ -430,6 +533,7 @@
     reader.readAsText(file);
   }
   async function initialize() {
+    bindBody();
     document.getElementById("export-button").addEventListener("click", exportData);
     document.getElementById("import-button").addEventListener("click", function () { document.getElementById("import-file").click(); });
     document.getElementById("import-file").addEventListener("change", importData);
